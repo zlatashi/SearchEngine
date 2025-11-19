@@ -1,21 +1,30 @@
 #include "inverted_index.h"
 #include <sstream>
+#include <future>
+#include <map>
 
 void InvertedIndex::updateDocumentBase(const std::vector<std::string>& input_docs) {
-    std::lock_guard<std::mutex> lock(_dictionary_mtx);
     freq_dictionary.clear();
 
-    for (size_t doc_id = 0; doc_id < input_docs.size(); ++doc_id) {
-        std::istringstream ss(input_docs[doc_id]);
-        std::string word;
-        std::map<std::string, size_t> word_count;
+    std::vector<std::future<std::map<std::string, size_t>>> futures;
 
-        while (ss >> word) {
-            ++word_count[word];
-        }
+    for (const auto& doc : input_docs) {
+        futures.push_back(std::async(std::launch::async, [&doc]() {
+            std::map<std::string, size_t> word_count;
+            std::istringstream ss(doc);
+            std::string word;
+            while (ss >> word) {
+                ++word_count[word];
+            }
+            return word_count;
+            }));
+    }
 
-        for (const auto& [w, count] : word_count) {
-            freq_dictionary[w][doc_id] = count;
+    for (size_t doc_id = 0; doc_id < futures.size(); ++doc_id) {
+        auto word_count = futures[doc_id].get();
+        for (const auto& [word, count] : word_count) {
+            std::lock_guard<std::mutex> lock(_dictionary_mtx);
+            freq_dictionary[word][doc_id] = count;
         }
     }
 }

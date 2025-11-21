@@ -28,7 +28,7 @@ public:
      * @return возвращает отсортированный список релевантных ответов для заданных запросов
      */
     std::vector<std::vector<RelativeIndex>> search(const std::vector<std::string>& queries_input, size_t max_responses = 5);
-    std::map<std::string, size_t> get_indexes_for_request_words(std::vector<std::string>& vec);
+    std::map<std::string, size_t> get_indexes_for_request_words(const std::vector<std::string>& vec);
     void handleRequest(const std::string& request, std::vector<RelativeIndex>& , size_t max_responses);
 private:
     InvertedIndex* _index;

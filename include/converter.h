@@ -44,7 +44,7 @@ public:
     /**
      * Положить в файл answers.json результаты поисковых запросов
      */
-    void putAnswers(std::vector<std::vector<RelativeIndex>>& answers);
+    void putAnswers(const std::vector<std::vector<RelativeIndex>>& answers);
 
     const std::string &getName() const;
 
